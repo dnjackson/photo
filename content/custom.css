@@ -1,0 +1,36 @@
+#contact {
+}
+
+body {
+  color: #FFFFFF !important;
+  background-color: #262626 !important;
+}
+
+.thumb_box {
+  width: 300px !important;
+}
+
+.logo {
+  background-image: url(../resources/images/logo.png) !important;
+  display: inherit !important;
+}
+
+.detail_text {
+  color: #B3B3B3 !important;
+  background-color: inherit;
+}
+
+.site_title {
+}
+
+#contact_info {
+}
+
+.textColor {
+  color: white !important;
+  background-color: inherit;
+}
+
+#viewport {
+    min-width: 1000px;
+}

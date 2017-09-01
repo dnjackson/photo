@@ -1,0 +1,25 @@
+importTags( "lr", "com.adobe.lightroom.default" )
+
+IdentityPlate {
+	destination='content/replace-logo.png',
+	enabledBinding = [[appearance.logo.replace]],
+}
+
+AddResources {
+	source='resources',
+	destination='resources',
+}
+
+AddPage {
+	filename = "index.html",
+	template = "index.html",
+}
+
+AddPage {
+	filename = "content/manifest.js",
+	template = "content/manifest.js",
+}
+
+AddCustomCSS {
+	filename='content/custom.css',
+}

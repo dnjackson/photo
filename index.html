@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+    <meta name="KEYWORDS" content="photography,software,photos,digital darkroom,gallery,image,photographer">
+    </meta>
+    <title>Daniel Jackson Photography</title>
+
+	<link rel="stylesheet" href="resources/css/master.css" />
+	<link rel="stylesheet" href="content/custom.css" />
+    <link rel="stylesheet" href="resources/css/widget.css"/>
+	<script src="resources/js/ie-alert.js"></script>
+	<script src="resources/js/jquery-1.7.2.min.js"></script>
+	<script src="resources/js/jquery-ui-1.8.20.custom.min.js"></script>
+
+	<script src="resources/js/jquery.touchwipe.min.js"></script>
+    
+	<script src="resources/js/gallery.js"></script>
+	<script src="resources/js/urls.js"></script>
+	<!-- set to manifest-stub.js for use outside plugin, and manifest.js for use in LR plugin -->
+	<script src="content/manifest.js"></script>
+	<script src="resources/js/widget.js"></script>
+	<script src="resources/js/analytics.js"></script>
+</head>
+
+<body>
+	<div id="idplate">
+		<div id="logo_spacer"></div> <!-- element added and removed on demand -->
+        <div class="logo">
+		</div>
+	</div>
+	<div class="menu">
+		<a class="menuitem" href="../../">home</a> · 
+		<a class="menuitem" href="../../portfolios/index/">portfolios</a> · 
+		<a class="menuitem" href="../../about.html">about</a> · 
+		<a class="menuitem" href="../../contact.html">contact</a>
+	</div>
+
+<div id="content">
+<div class="site_title">
+	Topic · Date
+</div>
+
+<div id="viewport">
+	<div id="image_container"></div>
+	<div id="grid_container"></div>
+	<div id="text_container">
+			<div class="scrollbar"><div class="track"><div class="thumb"><div class="end"></div></div></div></div>
+			<div class="scrollbody">
+				<div class="text" class="textColor">
+					<div id="text"></div>
+				</div>
+			</div>
+		</div>
+
+</div> <!-- viewport -->
+</div> <!-- content -->
+
+<footer>
+	<!-- begin widget -->
+	<div class="widget-container">
+	  <div class="widget-hider">
+	    <div class="widget">
+		<div class="widget-control-height">
+	      <div class="widget-button widget-shiny widget-photo" title="show full size photo"></div>
+	      <div class="widget-button widget-shiny widget-grid" title="view grid"></div>
+	      <div class="widget-button widget-shiny widget-text" title="view text"></div>
+	      <div class="widget-button widget-dis widget-disprev" title="previous photo or thumbnail grid (disabled)"></div>
+	      <div class="widget-button widget-shiny widget-prev" title="previous photo or thumbnail grid "></div>
+	      <div class="widget-button widget-shiny widget-play" title="play slideshow"></div>
+	      <div class="widget-button widget-shiny widget-pause" title="pause slideshow"></div>
+	      <div class="widget-button widget-dis widget-disnext" title="next photo or thumbnail grid (disabled)"></div>
+	      <div class="widget-button widget-shiny widget-next" title="next photo or thumbnail grid"></div>
+	    </div>
+    	</div>
+	  </div>
+	</div>
+	<!-- end widget -->
+</footer>
+</body>
+
+<script>
+var go = function () {
+    // patch URLs to allow loading locally
+    SP.enableLocal();
+    
+	// set various element properties based on user preferences
+	// override default page title in header only if title is given 
+	if (SP.preferences.title != "") $('title').text(SP.preferences.title);
+	$('.site_title').text(SP.preferences.title);
+	$('.logo').click(function () {window.location.href=SP.preferences.logoLink;});	
+	if (SP.preferences.showMenu) $('.menu').show();
+	$('.text').html(SP.preferences.text); 
+
+	// setup and start gallery
+    var gallery = SP.Gallery (
+		$('#image_container'),
+		$('#grid_container'),
+		$('#text_container'),
+		$('#logo_spacer'),
+		$('.menu'),
+		SP.preferences, SP.texts, SP.images, widget);
+	gallery.preload();
+	gallery.start();
+
+	// setup toolbar widget
+	// names for buttons are defined in widget.js
+    var callbacks = {
+		play: gallery.play, pause: gallery.pause,
+		next: gallery.next, prev: gallery.prev,
+		disnext: gallery.next_disabled, disprev: gallery.prev_disabled,
+        grid: gallery.change_to_grid_mode,
+		photo: gallery.change_to_photo_mode,
+		text: gallery.change_to_text_mode
+		};
+    var widget = SP.widget(callbacks, SP.preferences.initialMode);
+	gallery.register_widget(widget);
+
+	// bind arrow button callbacks to arrow keys also
+	$(document).keydown(function(e){
+	    if (e.keyCode == 37) { // arrow left key 
+			gallery.prev();
+			widget.refresh();
+		} else if (e.keyCode == 39) { // arrow right key 
+			gallery.next();
+			widget.refresh();
+	    	}
+		});
+
+	// bind events for iPad and iPhone
+	$("#image_container").touchwipe({
+		wipeLeft: gallery.next,
+		wipeRight: gallery.prev
+	});
+	$("#grid_container").touchwipe({
+		wipeLeft: gallery.next,
+		wipeRight: gallery.prev
+	});
+	}
+$(go);
+
+</script>
+
+</html>

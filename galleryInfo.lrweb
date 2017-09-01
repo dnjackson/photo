@@ -1,0 +1,510 @@
+--[[
+Lightroom Web Engine
+Copyright 2012-2015, Daniel Jackson
+]]
+
+return {
+	LrSdkVersion = 2.0,
+	LrSdkMinimumVersion = 2.0, -- minimum SDK version required by this plugin
+	
+	title = "DNJ Gallery",
+	id = "photo.dnj",
+	galleryType = "lua",
+	maximumGallerySize = 50000,
+	wrapperPath = "index.html", -- sidesteps standard grid/page scheme and uses this template for root instead
+	supportsLiveUpdate = false,
+	
+	model = {
+		["photoSizes.large.directory"] = "images/large",
+		["photoSizes.large.cropMode"] = "normal",
+		["photoSizes.large.height"] = function() return photoSizes.large.width end,
+		["photoSizes.large.maxHeight"] = 900,
+		["photoSizes.large.maxWidth"] = 900,
+		["photoSizes.large.metadataExportMode"] = function() return photoSizes.thumb.metadataExportMode end,
+		["photoSizes.large.width"] = 600,
+		
+		["photoSizes.thumb.directory"] =  "images/thumb",
+		-- in fill mode, images are sized so that both dimensions are no smaller than the given sizes
+		["photoSizes.thumb.cropMode"] = function() return nonCSS.thumbs.fill and "minimum" or "normal" end,
+
+		["photoSizes.thumb.width"] = 130,
+		["photoSizes.thumb.height"] = function() return photoSizes.thumb.width * nonCSS.thumb.ratio / 100 end,
+
+    -- set default thumb ratio to square (100%)
+		-- note this is the box size, not the image shape (which is determined by the fill setting)
+    ["nonCSS.thumb.ratio"] = 100,
+
+		["photoSizes.thumb.metadataExportMode"] = "copyright",
+		["photoSizes.tracking"] = false,
+		
+		["appearance.thumb.width"] = function()
+		  return string.format( "%dpx", photoSizes.thumb.width)
+		end,
+
+		-- note that all pixel measurements of widths use math.floor so that
+		-- caculated max viewport width is greater than their total
+		["appearance.thumb.height"] = function()
+	  return string.format( "%dpx", math.floor( photoSizes.thumb.width * nonCSS.thumb.ratio / 100))
+		end,
+		
+		-- for square thumbnails
+		["appearance.thumb.max-width"] = function()
+			return string.format( "%dpx", photoSizes.thumb.width)
+		end,
+		["appearance.thumb.max-height"] = function()
+			return string.format( "%dpx", math.floor( photoSizes.thumb.width * nonCSS.thumb.ratio / 100))
+		end,
+
+		["appearance.thumb.overflow"] = "hidden",
+		["appearance.thumb.cssID"] = ".thumb_frame",
+
+		-- note that viewport.max-width must use same padding constant
+		["appearance.thumbOuter.padding"] = function()
+			return string.format( "%dpx", math.floor(photoSizes.thumb.width * nonCSS.spacing * 0.002))
+		end,
+
+		-- to control width and height for square thumbs
+		["appearance.thumbOuter.cssID"] = ".thumb_box",
+		
+		-- for responsive adjustment of height of images
+		["appearance.imageFrame.max-height"] = function ()
+			-- calculate vertical space left
+			local id = nonCSS.logoShrink and 62 or 102
+			local menu = nonCSS.showMenu and 28 or 0
+			local padding = 20
+			local title = 45
+			local caption = 36
+			local widget = 40
+			local rest = id + menu + padding + title + caption + widget
+			-- maximum height of image is viewport size minus what's left
+			return string.format( "calc(100vh - %dpx)", rest)
+			end,
+		["appearance.imageFrame.cssID"] = ".image_frame",
+
+		-- for responsive adjustment of height of text container
+		["appearance.textContainer.max-height"] = function ()
+			-- calculate vertical space left
+			local id = 102
+			local menu = nonCSS.showMenu and 28 or 0
+			local padding = 50
+			local title = 48
+			local widget = 40
+			local rest = id + menu + padding + title + widget
+			-- maximum height is viewport size minus what's left
+			return string.format( "calc(100vh - %dpx)", rest)
+			end,
+		["appearance.textContainer.cssID"] = "#text_container",
+
+		["appearance.body.background-color"] = "#262626",
+		["appearance.body.color"] = "#FFFFFF",
+		["appearance.body.cssID"] = "body",
+
+		-- set max width of viewport so thumbnails occupy given number of columns
+		["appearance.viewport.max-width"] = function()
+			return string.format( "%dpx", nonCSS.numCols * (photoSizes.thumb.width + (2 * math.floor(photoSizes.thumb.width * nonCSS.spacing * 0.002))))
+		end,
+		["appearance.viewport.cssID"] = "#viewport",
+
+		["appearance.sitetitle.cssID"] = ".site_title",
+		["metadata.siteTitle.value"] = "Topic · Date",
+
+		["appearance.contact.cssID"] = "#contact",
+		["appearance.contactInfo.cssID"] = "#contact_info",
+
+		["appearance.textColor.color"] = "#b3b3b3",
+		["appearance.textColor.cssID"] = ".textColor",
+		["appearance.detailText.color"] = "#b3b3b3",
+		["appearance.detailText.cssID"] = ".detail_text",
+		
+		["nonCSS.replaceLogo"] = false,
+		["appearance.logo.display"] = true,
+		["appearance.logo.cssID"] = ".logo",
+		["appearance.logo.height"] = function()
+			return getIdentityPlateSize().height
+			end,
+			
+		["appearance.logo.background-image"] = function()
+			if nonCSS.replaceLogo then
+				return "url(replace-logo.png)"
+			else
+				return "url(../resources/images/logo.png)"
+				end
+			end,
+
+		["metadata.contactInfo.link"] = {
+			value = "mailto:info@dnj.photo",
+			metadata = { [ "ag:dataType" ] = "webLink" },
+		},
+		["metadata.contactInfo.value"] = "Daniel Jackson",
+		["metadata.homePage.value"] = {
+			value = "http://danieljackson.photo",
+			metadata = { [ "ag:dataType" ] = "webLink" },
+		},
+
+		["lightroomApplication.identityPlateExport"] = "(main)",
+		["lightroomApplication.jpegQuality"] = 70,
+		["lightroomApplication.sizeBeingViewed"] = "thumb",
+		["lightroomApplication.useWatermark"] = false,
+		["lightroomApplication.watermarkID"] = "",
+		["lightroomApplication.outputSharpeningOn"] = true,
+		["lightroomApplication.outputSharpening"] = 2,
+
+		-- not sure what this does; maybe not needed?
+		["nonCSS.tracking"] = false,
+		
+		["nonCSS.identityPlateAbsolutePath"] = "",		
+		["nonCSS.imageBase"] = "content",
+		["nonCSS.numCols"] = 4,
+		["nonCSS.numRows"] = 3,
+
+		-- grid spacing: padding as percent of additional 20%
+		["nonCSS.spacing"] = 50,
+
+		["nonCSS.enabledPhotoMode"] = true,
+		["nonCSS.enabledSlideshowMode"] = true,
+		["nonCSS.enabledGridMode"] = true,
+		["nonCSS.enabledTextMode"] = false,
+		["nonCSS.initialMode"] = "SP.mode.GRID",
+
+		["nonCSS.timings.fadeIn"] = 100,
+		["nonCSS.timings.fadeOut"] = 300,
+		["nonCSS.timings.transition"] = 5000,
+
+		["nonCSS.logoShrink"] = true,
+		["nonCSS.skipFade"] = true,
+		["nonCSS.showMenu"] = true,
+		-- when true, ensures that image fills entire thumbnail box
+		["nonCSS.thumbs.fill"] = false,
+		["nonCSS.text"] = "",
+		
+		["nonCSS.tracking"] = false,
+
+		["perImageSetting.photoCaption"] = {
+			enabled = true,
+			value = "",
+			title = "Image",
+		},
+		["perImageSetting.thumbCaption"] = {
+			enabled = false,
+			value = "",
+			title = "Thumb",
+		},
+	},
+
+	views = function( controller, f )
+		local LrView = import "LrView"
+		local bind = LrView.bind
+		-- doesn't work with undo yet
+		local multibind = f.multibind
+
+		return { 
+
+			labels = f:panel_content {
+				bindToObject = controller,
+				f:subdivided_sections {
+					f:labeled_text_input  {
+						title = "Site Title",
+						value = bind "metadata.siteTitle.value",
+						max_length = 500,
+					},
+				},
+				f:subdivided_sections {
+					f:labeled_text_input  {
+						title = "Textual description",
+						wraps = true,
+						value = bind "nonCSS.text",
+						max_length = 5000,
+						include_mru = false -- don't save most recently used value
+					},
+				},
+				f:subdivided_sections {
+					f:labeled_text_input  {
+						title = "Contact Info",
+						value = bind "metadata.contactInfo.value",
+					},
+					f:labeled_text_input  {
+						title = "Web or Mail Link",
+						value = bind "metadata.contactInfo.link",
+						wraps = false,
+					},
+				},
+				f:subdivided_sections {
+					f:header_section {
+						f:checkbox_row {
+							title = "Shrink header when showing photos",
+							value = bind "nonCSS.logoShrink",
+						},
+					},
+					f:header_section {
+						f:checkbox_row {
+							title = "Replace standard identity plate",
+							value = bind "nonCSS.replaceLogo",
+						},
+					},
+					f:identity_plate {
+						value = bind "lightroomApplication.identityPlateExport",
+						enabled = bind "appearance.logo.display",
+					},
+					f:labeled_text_input {
+						title = "Link",
+						value = bind "metadata.homePage.value",
+						wraps = false,
+					},
+				},
+			},
+			colorPalette = f:panel_content {
+				bindToObject = controller,
+				f:subdivided_sections {
+					f:color_content_column {
+						f:label_and_color_row {
+							color = bind "appearance.textColor.color",
+							title = "Text",
+						},
+						f:label_and_color_row {
+							color = bind "appearance.detailText.color",
+							title = "Detail Text",
+						},
+					},
+				},
+			},
+			appearanceConfiguration = f:panel_content {
+				bindToObject = controller,
+				f:subdivided_sections {
+					f:header_section_label {
+						title = "Features",
+					},
+					f:content_section {
+						f:checkbox_row {
+							title = "Large photos",
+							value = bind "nonCSS.enabledPhotoMode",
+						},
+					},
+					f:content_section {
+						f:checkbox_row {
+							title = "Slideshow",
+							value = bind "nonCSS.enabledSlideshowMode",
+						},
+					},
+					f:content_section {
+						f:checkbox_row {
+							title = "Thumbnail grid",
+							value = bind "nonCSS.enabledGridMode",
+						},
+					},
+					f:content_section {
+						f:checkbox_row {
+							title = "Textual description",
+							value = bind "nonCSS.enabledTextMode",
+						},
+					},
+					f:header_section {
+						ui.popup_row {
+							title = "Open with", 
+							bindingValue = "nonCSS.initialMode",
+							items = { { title = "Large photos", value = "SP.mode.PHOTO" }, 
+										{ title = "Slideshow", value = "SP.mode.SLIDESHOW" }, 
+										{ title = "Thumbnail grid", value = "SP.mode.GRID" }, 
+										{ title = "Textual description", value = "SP.mode.TEXT" }
+										},
+							bindingEnabled = true,
+						},
+					},
+
+				},
+				f:subdivided_sections {
+					f:header_section {
+						f:static_text  {
+							title = "Grid dimensions",
+							place_vertical = 0.5,
+							-- SPAM : this should probably be default on static_text
+						},
+						f:warning_icon {
+							visibility = {
+								key = "lightroomApplication.sizeBeingViewed",
+								whenNotEqual = "thumb",
+							},
+							tooltip = "Changes to Grid Pages settings aren't currently visible.  Click in the large image to return to the grid page.",
+						},
+					},
+					f:content_column {
+						f:row_column_picker {
+							fill_horizontal = 1,
+							rows = bind "nonCSS.numRows",
+							columns = bind "nonCSS.numCols",
+							max_rows = 5,
+							max_columns = 12,
+							min_rows = 1,
+							min_columns = 1,
+							tooltip = "Click anywhere in the grid to set dimensions.",
+							fill_horizontal=1,
+						},
+					},
+				},
+				f:subdivided_sections {
+					f:header_section {
+						f:static_text  {
+							title = "Image sizes",
+							place_vertical = 0.5,
+								-- SPAM this shouldn't be specified here
+						},
+					},
+					f:slider_content_column {
+						f:slider_row {
+							title = "Photos",
+							value = bind "photoSizes.large.width",
+							tracking = bind "nonCSS.tracking",
+								-- SPAM, couldn't we find a way to remove this
+							unit = "px",
+							max = 900,
+							min = 300,
+							width_in_digits = WIN_XP_ENV and 5 or 4,
+							precision = 0,
+						},
+						f:slider_row {
+							title = "Thumbs",
+							value = bind "photoSizes.thumb.width",
+							tracking = bind "nonCSS.tracking",
+								-- SPAM, couldn't we find a way to remove this
+							unit = "px",
+							max = 250,
+							min = 50,
+							width_in_digits = WIN_XP_ENV and 5 or 4,
+							precision = 0,
+						},
+						f:slider_row {
+							title = "Ratio",
+							value = bind "nonCSS.thumb.ratio",
+							tracking = bind "nonCSS.tracking",
+								-- SPAM, couldn't we find a way to remove this
+							unit = "%",
+							max = 150,
+							min = 67,
+							width_in_digits = WIN_XP_ENV and 5 or 4,
+							precision = 0,
+						},
+						f:slider_row {
+							title = "Spacing",
+							value = bind "nonCSS.spacing",
+							tracking = bind "nonCSS.tracking",
+								-- SPAM, couldn't we find a way to remove this
+							unit = "%",
+							max = 100,
+							min = 0,
+							width_in_digits = WIN_XP_ENV and 5 or 4,
+							precision = 0,
+						},
+					},
+				},
+
+				f:subdivided_sections {
+					f:header_section {
+						f:static_text  {
+							title = "Timings",
+							place_vertical = 0.5,
+								-- SPAM this shouldn't be specified here
+						},
+					},
+					f:slider_content_column {
+						f:slider_row {
+							title = "Transition",
+							value = bind "nonCSS.timings.transition",
+							unit = "ms",
+							max = 10000,
+							min = 0,
+							width_in_digits = WIN_XP_ENV and 5 or 4,
+							precision = 0,
+						},
+						f:slider_row {
+							title = "Fade in",
+							value = bind "nonCSS.timings.fadeIn",
+							unit = "ms",
+							max = 1000,
+							min = 0,
+							width_in_digits = WIN_XP_ENV and 5 or 4,
+							precision = 0,
+						},
+						f:slider_row {
+							title = "Fade out",
+							value = bind "nonCSS.timings.fadeOut",
+							unit = "ms",
+							max = 1000,
+							min = 0,
+							width_in_digits = WIN_XP_ENV and 5 or 4,
+							precision = 0,
+						},
+					},
+					f:header_section {
+						f:checkbox_row {
+							title = "Show navigation bar",
+							value = bind "nonCSS.showMenu",
+						},
+					},
+					f:header_section {
+						f:checkbox_row {
+							title = "Thumbs fill boxes",
+							value = bind "nonCSS.thumbs.fill",
+						},
+					},
+					f:header_section {
+						f:checkbox_row {
+							title = "Use fade effects only for slideshow",
+							value = bind "nonCSS.skipFade",
+						},
+					},
+				},
+			},
+
+			outputSettings = f:panel_content {
+				bindToObject = controller,
+				f:subdivided_sections {
+					f:header_section_label {
+						title = "Photos",
+					},
+					f:slider_content_column {
+						f:slider_row {
+							title = "Quality",
+							value = bind "lightroomApplication.jpegQuality",
+							tracking = bind "lightroomApplication.jpegQuality.tracking",
+							tracking_value = "qualityTracking",
+							unit = "",
+							max = 100,
+							min = 0,
+							width_in_digits = 4,
+							precision = 0,
+						},
+						f:metadataModeControl {
+							value = bind "photoSizes.thumb.metadataExportMode",
+						},
+					},
+					f:watermark_section( controller ),
+				},
+				f:subdivided_sections {
+					f:header_section {
+						ui.popup_row {
+							title = "Sharpening", 
+							checkbox = {
+								bindingValue = "lightroomApplication.outputSharpeningOn",
+							},
+							bindingValue = "lightroomApplication.outputSharpening",
+							items = { { title = "Low", value = 1 }, 
+										{ title = "Standard", value = 2 }, 
+										{ title = "High", value = 3 } },
+							bindingEnabled = "lightroomApplication.outputSharpeningOn",
+						},
+					},
+					f:content_section {
+						margin_left = 30,
+						f:static_text {
+							fill_horizontal = 1,
+							title = "Sharpening is applied on output.",
+							font = warningFont,
+						},
+					},
+				},
+			},
+		}
+	end,
+
+}
+
+

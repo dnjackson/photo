@@ -1,0 +1,273 @@
+/* GLOBAL */
+* {
+	margin:0;
+	padding:0;
+}
+body {
+  /* amazingly, this causes images to be centered, since property is inherited */
+	text-align:center;
+	margin-left:0px;
+	margin-right:0px;
+	margin-top: 0px;
+	margin-bottom: 20px;
+	padding:0;
+}
+img {
+	border: 0;
+}
+
+/* TYPOGRAPHY */
+body, h1, h2, h3, h4, h5, h6, p, a {
+	background-color:inherit;
+	font-size: 15px;
+	font-family: 'Lucida Grande', Verdana, sans-serif;
+}
+
+/* LINKS */
+a, a:link {
+	text-decoration:none;
+	color: #FFFFFF !important;
+	cursor:pointer;
+}
+a:hover {
+	color: #DDDDDD !important;
+	cursor:pointer;
+}
+a:link a:visited a:hover, a:active {
+	text-decoration:none;
+}
+
+/* MISC */
+.clear {
+	clear: both;
+}
+
+/* ID PLATE */
+#idplate {
+	background-color:#000000;
+	/*
+	for old SP index page, top=60, bottom=12
+	for portfolio pages, top=20, bottom=0
+	*/
+	padding-top: 20px;
+	padding-bottom: 10px;
+}
+
+/* no background color needed: assume logo PNG has transparent background */
+.logo {
+  background-repeat: no-repeat;
+  background-position: center;
+  height: 32px; /* height of default logo; overriden in custom.css if replaced */
+  width: 100%;
+}
+
+.logo:hover {
+	cursor:pointer;
+}
+
+#logo_spacer {
+  height: 40px;
+}
+
+.site_title {
+  padding-top: 10px;
+  padding-bottom: 20px;
+  color: #AAAAAA;
+}
+  
+.menu {
+  padding-top: 10px;
+  display: none; /* gets shown if turned on in preferences */
+}
+
+a.menuitem {
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#content {
+  padding-top:15px;
+  }
+
+#viewport {
+ margin: auto;
+}
+
+#image_container {
+}
+
+.image_box {
+  /* must be positioned absolute so all images sit on top of each other */
+  position:absolute;
+  left: 0;
+  width: 100%;
+}
+
+.image_frame {
+  max-width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+  /* for responsive reduction of height of image */
+  /* conservative setting overridden in custom.css */
+  max-height: calc(100vh - 270px);
+}
+
+.image_frame > img {
+  max-width: 100%;
+  max-height: inherit;
+}
+
+p.image_caption{
+  clear: both;
+  color: #888;
+  font-size: 13px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  /* this should really depend on width of image */
+  width: 400px;
+  margin: auto;
+  text-align: center;
+}
+
+p.thumb_caption{
+  color: #888;
+  font-size: 11px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  text-align: center;
+}
+
+#text_container {
+  background-color: #000;
+  color: white;
+  padding: 10px;
+  overflow: auto;
+  display: inline-block;
+  width: 300px;
+  font-family: Corbel, 'Lucida Grande', Verdana, sans-serif;
+  font-size: 10pt;
+  text-align: left;
+
+  height: 100%;
+  width: 70%; /* was 510px */
+  clear: both;
+  /* for responsive reduction of height */
+  /* conservative setting overridden in custom.css */
+  max-height: calc(100vh - 250px);
+}
+
+#text_container p, #text_container h1,  #text_container h2,  #text_container h3 {
+  font-family: inherit;
+  font-size: inherit;
+  text-align: inherit;
+  color: white;
+}
+
+#text_container p {
+  padding-top: 0.5em;
+}
+
+#grid_container {
+  text-align: left;	/* so hanging thumbs aren't centered! */
+  background-color:inherit; /* #555; */
+  display: inline-block;
+}
+
+/* because hanging thumb treatment messed up on small viewports;
+should use actual max width of #viewport here, but not sure how
+to get that */
+@media (max-width: 900px) {
+	#grid_container {
+		text-align: center;
+	}
+}
+
+/* GRID LABEL */
+.spacer {
+  padding-left: 3px;
+  padding-right: 3px;
+}
+.number {
+  cursor: pointer;
+}
+
+.number_highlight {
+  color: white;
+  cursor: default;
+}
+
+.grid_label {
+  text-align: center;
+  position: relative;
+  top: -10px;
+  padding: 0px;
+  color: #AAAAAA;
+}
+
+.thumb_box {
+  cursor: pointer; /* gets cancelled by gallery.js if no photo mode */
+  vertical-align: bottom;  /* fix for Safari bug, thanks to Lea Verou */
+}
+
+.thumb_frame {
+  text-align: center;
+  padding: 0px;	
+}
+
+.thumb_box > img {
+  text-align: center;
+  display: inline-block;
+  background-color: black;
+  padding: 0px;
+}
+
+.thumb_box > img:hover {
+  /*
+  background-color:#333;
+  */
+}
+
+.thumb_box {
+  display: inline-block;
+  color:inherit;
+  background-color: inherit;
+  padding: 10px;
+}
+
+footer {
+	margin: 0 auto;
+	padding: 0;
+	padding-bottom: 5px;
+	width: 100%;
+	position: absolute;
+	overflow: hidden;
+	bottom: 0;
+	left: 0;
+	z-index: 2;
+	}
+		
+/* currently used only to provide transition for opacity */
+/* to use fully, must remove opacity setting in gallery.js
+but that's used to control visibility */
+.grid:hover .thumb_box {
+	transition: .3s opacity;
+	/* opacity: .2; */
+}
+
+.grid:hover .thumb_box:hover {
+	/* opacity: 1; */
+}
+
+/* vendor specific scrollbar settings */
+#text_container::-webkit-scrollbar {
+  width: 9px;  /* for vertical scrollbars */
+  height: 9px; /* for horizontal scrollbars */
+}
+
+#text_container::-webkit-scrollbar-track {
+  background: rgba(100, 100, 100, 0.5);
+}
+
+#text_container::-webkit-scrollbar-thumb {
+  background: rgba(200, 200, 200, 0.5);
+}
